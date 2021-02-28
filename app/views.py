@@ -10,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash, session, a
 from werkzeug.utils import secure_filename
 from .forms import PhotoForm
 
-UPLOAD_FOLDER = './uploads'
+app.config['UPLOAD_FOLDER'] = '/info3180-lab4/uploads'
 
 ###
 # Routing for your application.
@@ -36,14 +36,13 @@ def upload():
     # Instantiate your form class
 
     # Validate file upload on submit
-    if request.method == 'POST':
-        if myform.validate_on_submit():
-        # Get file data and save to your uploads folder
-            image = myform.imageFile.data
-            filename = secure_filename(image.filename)
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    if request.method == 'POST' and myform.validate_on_submit():
+        # Get file data and save to your uploads folder'
+        image = myform.imageFile.data
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
-            flash('File Saved', 'success')
+        flash('File Saved', 'success')
         return redirect(url_for('home'))
 
     return render_template('upload.html', form = myform)
@@ -89,6 +88,28 @@ def send_text_file(file_name):
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
 
+def get_uploaded_images():
+    rootdir = os.getcwd()
+    images = []
+    for subdir, dirs, files in os.walk(rootdir + 'UPLOAD_FOLDER'):
+        for file in files:
+            image_path = os.path.join(subdir, file)
+            images.append(image_path)
+    return images
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    root_dir = os.getcwd()
+    return send_from_directory(os.path.join(root_dir, app.config['UPLOAD_FOLDER']), filename)
+
+@app.route('/files')
+def files():
+    if not session.get('logged_in'):
+        abort(401)
+
+    images = get_uploaded_images()
+    print(images)
+    return render_template('files.html', images=images)
 
 @app.after_request
 def add_header(response):
