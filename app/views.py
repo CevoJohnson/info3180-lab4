@@ -9,8 +9,7 @@ from app import app
 from flask import render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.utils import secure_filename
 from .forms import PhotoForm
-
-app.config['UPLOAD_FOLDER'] = '/info3180-lab4/uploads'
+from flask import send_from_directory
 
 ###
 # Routing for your application.
@@ -91,25 +90,23 @@ def send_text_file(file_name):
 def get_uploaded_images():
     rootdir = os.getcwd()
     images = []
-    for subdir, dirs, files in os.walk(rootdir + 'UPLOAD_FOLDER'):
+    for subdir, dirs, files in os.walk(rootdir + '/uploads'):
         for file in files:
-            image_path = os.path.join(subdir, file)
-            images.append(image_path)
+            ##image_path = os.path.join(subdir, file)
+            images.append(file)
     return images
 
 @app.route('/uploads/<filename>')
 def get_image(filename):
-    root_dir = os.getcwd()
-    return send_from_directory(os.path.join(root_dir, app.config['UPLOAD_FOLDER']), filename)
+    rootdir_ = os.getcwd()
+    return send_from_directory(os.path.join(rootdir_, app.config['UPLOAD_FOLDER']), filename)
 
 @app.route('/files')
 def files():
     if not session.get('logged_in'):
         abort(401)
 
-    images = get_uploaded_images()
-    print(images)
-    return render_template('files.html', images=images)
+    return render_template('files.html', images=get_uploaded_images())
 
 @app.after_request
 def add_header(response):
