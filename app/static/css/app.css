@@ -1,3 +1,21 @@
 body {
     padding-top: 5rem;
 }
+
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+     justify-content: space-between; 
+     list-style-type: none;
+}
+
+.grid img {
+    flex: 0 0 32%;
+    height: 300px;
+    margin-bottom: 5px;
+}
+
+.grid li{
+    padding: 2em;
+
+}
